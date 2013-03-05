@@ -140,6 +140,10 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
         return 1;
     }
     /*send messages to the IPs*/
+    /******************************************************************************/
+    /*       put the function of send message                                     */                     
+    /*                                                                            */ 
+    /*******************************************************************************/
     return 0;
 }
 
