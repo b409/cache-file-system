@@ -74,19 +74,18 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
             IO_Node *io_node=(IO_Node*)malloc(sizeof(IO_Node));
             while(strlen(io_node_ptr)>1)
             {
-                printf("##################%s\n",io_node_ptr);
                 if(ion_get(io_node_ptr,io_node)==0)
                 {
                     u64 offset=(*io_node).offset;
-                    u32 *data_size;//to put the real data size
-                    u32 *real_data=iod_get(io_node_ptr,data_size);
+                    u32 data_size;//to put the real data size
+                    u8 *real_data=iod_get(io_node_ptr,&data_size);
                     /******************************************************
                      *
                      * use the data_size /offset /real_data to do the update 
                      * of the replica
                      *
                      * ****************************************************/
-                    printf("@@@@@@@@@@@@@@@@@@@@@@%s   %d\n",real_data,*data_size);
+                    printf("@@@@@@@@@@@@@@@@@@@@@@%s   %d\n",real_data,data_size);
                     strcpy(io_node_ptr,(*io_node).ion_next);
                 }
                 else
