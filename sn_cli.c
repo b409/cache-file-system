@@ -84,7 +84,7 @@ u32 sctp_send_sock_recv_rpl(u8 *sn_ip,SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
 	/*----------------------- convert xml_buf to rpl_msg end --------------------------*/
 op_over:
 	close(sock_fd);
-	return ret;
+	return ret;//if send the message and receive the ack successfully return 0;
 }
 int main()
 {

@@ -1,6 +1,9 @@
 /* file   : sn_sckt.h 
  * author : grant chen 
  * date   : Jan 6 2013
+ *
+ * changed by Jin (2013-03-06)
+ * <change> FS_SUPERNODE_IP "192.168.0.19"
  * */
 #ifndef _SN_SCKT
 #define _SN_SCKT
@@ -9,7 +12,7 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<netinet/sctp.h>
-#define FS_SUPERNODE_IP "127.0.0.1"
+#define FS_SUPERNODE_IP "192.168.0.19"
 #define FS_SUPERNODE_PORT 9399
 #define FS_SUPERNODE_MAX_LISTEN_Q 100
 /*----------------------- sock_msg dispose definition start ------------------------*/
