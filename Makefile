@@ -13,8 +13,8 @@ ALL = sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test
 .PHONY : all sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test
 all : sn_main  xml_msg.o mk_xml_to_stdout parse_xml_from_stdin io_queue_test
 
-sn_main : sn_main.o xml_msg.o utility.o
-	gcc sn_main.o xml_msg.o utility.o $(CC_OP) sn_main $(LINK_LIB)
+sn_main : sn_main.o xml_msg.o utility.o tt_func.o
+	gcc sn_main.o xml_msg.o utility.o tt_func.o $(CC_OP) sn_main $(LINK_LIB)
 io_queue_test : io_queue_test.o io_queue.o tt_func.o sn_sckt.o xml_msg.o utility.o
 	gcc io_queue_test.o io_queue.o tt_func.o sn_sckt.o xml_msg.o utility.o $(CC_OP) io_queue_test $(LINK_LIB)
 mk_xml_to_stdout : make_xml.o

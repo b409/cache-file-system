@@ -1,6 +1,10 @@
 #include"glob.h"
 #include"sn_sckt.h"
 #include"tt_func.h"
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 char *eat_space(char *p)
 {
 	char * i = p;
@@ -258,5 +262,28 @@ int sock_msg_to_buf_with_command_line_pipe(SOCK_MSG *sock_msg,u8 *buf,u32 bufsiz
 	while(fgets(buf + i,bufsiz - i,fp) != NULL){i = strlen(buf);}
 	pclose(fp);
 	return 0;
+}
+
+// to get the host ip.
+char* get_host_ip()
+{
+    char name[128];
+    struct hostent *hent;
+    int i;
+    char host_ip[INET_ADDRSTRLEN];
+    gethostname(name,sizeof(name));
+
+    hent=gethostbyname(name);
+
+    for(i=0;hent->h_addr_list[i];i++)
+    {
+        if(strcmp(inet_ntoa(*(struct in_addr*)(hent->h_addr_list[i])),"127.0.0.1")==0)continue;
+        else
+        {
+            strcpy(host_ip,inet_ntoa(*(struct in_addr*)(hent->h_addr_list[i])));
+            break;
+        }
+    }
+    return host_ip;
 }
 #endif

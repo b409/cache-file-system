@@ -1,13 +1,16 @@
 #include"io_queue.h"
+#include "utility.h"
 
 int main()
 {
     Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
     meta_data->ioq.tail=0;
     meta_data->ioq.head=0;
-    meta_data->replica_num=2;
+    strcpy(meta_data->io_node_q_head,"");
+    strcpy(meta_data->io_node_q_tail,"");
+    meta_data->replica_num=1;
     strcpy(meta_data->my_rep[0].host_ip,"192.168.0.19");
-    strcpy(meta_data->my_rep[1].host_ip,"192.168.0.18");
+    //strcpy(meta_data->my_rep[1].host_ip,"192.168.0.18");
     char * filename="lollipop";
     if(md_put(filename,meta_data)!=0)
     {
@@ -23,6 +26,10 @@ int main()
     u64 offset=0;
     write_queue_out(filename,io_type,now_time,offset,data,size);
     free(meta_data);
+
+    //char host_ip[INET_ADDRSTRLEN];
+    //strcpy(host_ip,get_host_ip());
+    //printf("!!!!!!!!!!!!!!!!!!!!!!!!!%s",host_ip);
 /*  Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
     meta_data->ioq.tail=0;
     meta_data->ioq.head=0;

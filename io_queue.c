@@ -7,7 +7,7 @@
 #include "io_queue.h"
 #include "sn_sckt.h"
 #include "xml_msg.h"
-
+#include "utility.h"
 /* 
 *  Used to put the IO into the queue and make the process waiting the IO to be the head of the queue.
 *  Parameters: filename--the key to get the metadata.
@@ -122,7 +122,7 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
         (*io_node).offset=offset;
         (*io_node).io_time=arrive_time;
         strcpy((*io_node).ion_pre,(*meta_data).io_node_q_tail);//modify the pre pointer.
-        strcpy((*io_node).ion_next," ");//next is NULL
+        strcpy((*io_node).ion_next,"");//next is NULL
         if(ion_put(path,io_node)!=0)
         {
             printf("Put io_node in write_queue_out error!\n");
@@ -150,18 +150,26 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
                 return 1;
             }
         }
-
-        /*if the io_node_q is NULL*/
-        if(strlen((*meta_data).io_node_q_head)==0)
+        else
         {
             strcpy((*meta_data).io_node_q_head,path);// if there is no IO_Node,we should change the head.
-            u32 i, replica_num=(*meta_data).replica_num;
-            for(i=0;i<replica_num;i++)
+        }
+        strcpy((*meta_data).io_node_q_tail,path);// modify the tail
+
+        // if the replica was clean,we use the io_node_ptr to be the tail
+        u32 i, replica_num=(*meta_data).replica_num;
+        char host_ip[INET_ADDRSTRLEN];
+        strcpy(host_ip,get_host_ip());
+        for(i=0;i<replica_num;i++)
+        {
+            //如果ip是自己，那么不用修改
+            if((strlen((*meta_data).my_rep[i].io_node_ptr)==0) && 
+                    (strcmp(host_ip,(*meta_data).my_rep[i].host_ip)!=0))
             {
                 strcpy((*meta_data).my_rep[i].io_node_ptr,path);//After you update the replica,you should move the io_node_ptr to next.
             }
         }
-        strcpy((*meta_data).io_node_q_tail,path);// modify the tail
+
         if(md_put(filename,meta_data)!=0)
         {
             printf("Put metadata in write_queue_out error!\n");
@@ -180,23 +188,32 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
         printf("Put data in write_queue_out error!\n");
         return 1;
     }
+
+
     /*send messages to the IPs*/
     if(md_get(filename,meta_data)==0)
     {
         u32 i,replica_num=(*meta_data).replica_num;
+        u8 dest_ip[INET_ADDRSTRLEN];
+
         u8 host_ip[INET_ADDRSTRLEN];
+        strcpy(host_ip,get_host_ip());
+
         pid_t pid;
         for(i=0;i<replica_num;i++)
-        {   
+        {  
+            //don't send message to my self
+            if(strcmp((*meta_data).my_rep[i].host_ip,host_ip)==0)break;
+
             // init a new process to deal with the message.
             if((pid=fork())==0)
             {   
-                strcpy(host_ip,(*meta_data).my_rep[i].host_ip);
+                strcpy(dest_ip,(*meta_data).my_rep[i].host_ip);
                 SOCK_MSG sockmsg;
 	            RPL_MSG rplmsg;
                 sockmsg.type=SOCKMSG_TYPE_WRITE;
                 strcpy(sockmsg.file_name,filename);
-                strcpy(sockmsg.dest_ip,host_ip);
+                strcpy(sockmsg.dest_ip,dest_ip);
 	            if(sctp_send_sock_recv_rpl(sockmsg.dest_ip,&sockmsg,&rplmsg) != 0){
 		            fprintf(stderr,"sctp_send_sock_recv_rpl fail!\n");
 		            return 1;
@@ -219,10 +236,56 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
     return 0;
 }
 
-u32 remove_queuue_out(const char* filename,IO_Type io_type)
+/*
+ * Used to do the remove queue out. send messages to the replicas and remove the meta_data.
+ */
+u32 remove_queue_out(const char* filename,IO_Type io_type)
 {
 
     /*send messages to the IPs*/
+    Meta_Data *meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+    if(md_get(filename,meta_data)==0)
+    {
+        u32 i,replica_num=(*meta_data).replica_num;
+        u8 dest_ip[INET_ADDRSTRLEN];
+        
+        u8 host_ip[INET_ADDRSTRLEN];
+        strcpy(host_ip,get_host_ip());
+        
+        pid_t pid;
+        for(i=0;i<replica_num;i++)
+        {
+            // do not send a message to itself
+            if(strcmp(host_ip,(*meta_data).my_rep[i].host_ip)==0)break;
+            // init a new process to deal with the message.
+            if((pid=fork())==0)
+            {   
+                strcpy(dest_ip,(*meta_data).my_rep[i].host_ip);
+                SOCK_MSG sockmsg;
+	            RPL_MSG rplmsg;
+                sockmsg.type=SOCKMSG_TYPE_REMOVE;
+                strcpy(sockmsg.file_name,filename);
+                strcpy(sockmsg.dest_ip,dest_ip);
+	            if(sctp_send_sock_recv_rpl(sockmsg.dest_ip,&sockmsg,&rplmsg) != 0){
+		            fprintf(stderr,"sctp_send_sock_recv_rpl fail!\n");
+		            return 1;
+	                }
+	            if(rplmsg.err != RPL_OK){
+		            fprintf(stderr,"rplmsg says some err happened!\n");
+		            return 1;
+	                }
+                exit(0);
+            }
+            else{ sleep(1);}
+        }
+        free(meta_data);
+    }
+    else
+    {
+        printf("Get metadata in write_queue_out error!\n");
+        return 1;
+    }
+
     /*delete the meta_data*/
     if(md_out(filename)!=0)
     {
@@ -232,59 +295,3 @@ u32 remove_queuue_out(const char* filename,IO_Type io_type)
     return 0;
 }
 
-u32 replica_update(const char *filename,const char*host_ip)
-{
-    /*here the host_ip should equals the one in the meta_data*/
-    Meta_Data *meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
-    if(md_get(filename,meta_data)==0)
-    {
-        /*to get the io_node_ptr of the right replica ip*/
-        u32 i, replica_num=(*meta_data).replica_num;
-        REPLICA replica;
-        for(i=0;i<replica_num;i++)
-        {
-            replica=(*meta_data).my_rep[i];
-            if(strcmp(replica.host_ip,host_ip)==0) break;
-        }
-        if(strlen(replica.io_node_ptr)!=0)
-        {
-            char io_node_ptr[IO_NODE_KEY_LEN];
-            strcpy(io_node_ptr,replica.io_node_ptr);
-            IO_Node *io_node=(IO_Node*)malloc(sizeof(IO_Node*));
-            while(strlen(io_node_ptr)!=0)
-            {
-                if(ion_get(io_node_ptr,io_node)==0)
-                {
-                    u64 offset=(*io_node).offset;
-                    u32 *data_size;
-                    char * real_data=iod_get(io_node_ptr,data_size);
-
-                    /*use the offset and data_size and real_data to update the replica*/
-
-                    //free(real_data);
-                    strcpy(io_node_ptr,(*io_node).ion_next);
-                }   
-                else
-                {
-                    printf("Get io_node in replica_update error!\n");
-                    return 1;
-                }
-            }
-            free(io_node);
-            bzero((*meta_data).my_rep[i].io_node_ptr,IO_NODE_KEY_LEN);
-        }
-        /*do not forget to update the metadata*/
-        if(md_put(filename,meta_data)!=0)
-        {
-            printf("Put metadata in replica_update error!\n");
-            return 1;
-        }
-        free(meta_data);
-    }
-    else
-    {
-        printf("Get metadata in replica_update error!\n");
-        return 1;
-    }
-
-}

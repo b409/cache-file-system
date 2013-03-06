@@ -47,8 +47,63 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
 	/* A write operation happened on one of the other replicas,
 	 * update replica on this SN to consistent stat. */
 	u32 ret = 0;
-	u8 cache_path[FILE_PATH_LEN];
-	get_cache_path(SOCK_MSG_FN,cache_path);
+	//u8 cache_path[FILE_PATH_LEN];
+	//get_cache_path(SOCK_MSG_FN,cache_path);
+    
+    //get the host ip
+    char host_ip[INET_ADDRSTRLEN];
+    strcpy(host_ip,get_host_ip()); 
+    
+    Meta_Data *meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+    if(md_get(sock_msg->file_name,meta_data)==0)
+    {
+        u32 i,replica_num=(*meta_data).replica_num;
+        REPLICA replica;
+        for(i=0;i<replica_num;i++)
+        {
+            replica=(*meta_data).my_rep[i];
+            if(strcmp(replica.host_ip,host_ip)==0)break;
+        }
+
+        // if the io_node_ptr points to somewhere
+        // it means we should do the update.
+        if(strlen(replica.io_node_ptr)>1)
+        {
+            char io_node_ptr[IO_NODE_KEY_LEN];
+            strcpy(io_node_ptr,replica.io_node_ptr);
+            IO_Node *io_node=(IO_Node*)malloc(sizeof(IO_Node));
+            while(strlen(io_node_ptr)>1)
+            {
+                if(ion_get(io_node_ptr,io_node)!=0)
+                {
+                    u64 offset=(*io_node).offset;
+                    u32 *data_size;//to put the real data size
+                    u32 *real_data=iod_get(io_node_ptr,data_size);
+                    /******************************************************
+                     *
+                     * use the data_size /offset /real_data to do the update 
+                     * of the replica
+                     *
+                     * ****************************************************/
+                    printf("@@@@@@@@@@@@@@@@@@@@@@%s   %d\n",real_data,*data_size);
+                    strcpy(io_node_ptr,(*io_node).ion_next);
+                }
+                else
+                {
+                    printf("Get io_node in do_update_replica error!\n");
+                    ret=1;
+                }
+            }
+            free(io_node);
+            bzero((*meta_data).my_rep[i].io_node_ptr,IO_NODE_KEY_LEN);
+        }
+        if(md_put(sock_msg->file_name,meta_data)!=0)
+        {
+            printf("Put metadata in do_update_replica error!\n");
+            ret=1;
+        }
+        free(meta_data);
+    }
 	return ret;
 }
 u32 do_remove_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
@@ -89,6 +144,16 @@ u32 do_sock_msg(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
 {
 	/* do_sock_msg:
 	 * deal with sock_msg and generate rpl_msg */
+    switch(sock_msg->type)
+    {
+        case SOCKMSG_TYPE_WRITE: 
+            do_update_replica(sock_msg,rpl_msg);
+            break;
+        case SOCKMSG_TYPE_REMOVE:
+            do_remove_replica(sock_msg,rpl_msg);
+            break;
+        default:;
+    }
 	u32 ret = 0;
 	/* for test */
 	RPL_MSG_ERR = RPL_OK;;
