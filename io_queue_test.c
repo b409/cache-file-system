@@ -5,6 +5,27 @@ int main()
     Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
     meta_data->ioq.tail=0;
     meta_data->ioq.head=0;
+    meta_data->replica_num=2;
+    strcpy(meta_data->my_rep[0].host_ip,"192.168.0.18");
+    strcpy(meta_data->my_rep[1].host_ip,"192.168.0.19");
+    char * filename="lollipop";
+    if(md_put(filename,meta_data)!=0)
+    {
+        printf("Put meta_data in main error\n");
+    }
+    time_t now_time;
+    time(&now_time);
+    IO_Type io_type=WRITE;
+    queue_in_wait(filename,io_type,now_time);
+
+    u8* data="hello world!\n";
+    u32 size=strlen(size);
+    u64 offset=0;
+    write_queue_out(filename,io_type,now_time,offset,data,size);
+    free(meta_data);
+/*    Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+    meta_data->ioq.tail=0;
+    meta_data->ioq.head=0;
     char * filename="lollipop";
    if( md_put(filename,meta_data)!=0)
     {
@@ -14,7 +35,7 @@ int main()
     time(&now_time);
     IO_Type io_type=READ;
     queue_in_wait(filename,io_type,now_time);
-    /*test*/
+
     md_get(filename,meta_data);
     int head=(*meta_data).ioq.head;
     int tail=(*meta_data).ioq.tail;
@@ -23,7 +44,7 @@ int main()
 
 
 
-    read_queuue_out(filename,io_type,now_time);
+    read_queue_out(filename,io_type,now_time);
 
     io_type=WRITE;
     queue_in_wait(filename,io_type,now_time);
@@ -78,6 +99,7 @@ int main()
     char*data2=iod_get(path,&size_data);
     printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%s-----%d\n",data2,size_data); 
     free(data2);
+    */
     return 0;
 
 }

@@ -1,7 +1,8 @@
-#include"glob.h"
-#include"sn_sckt.h"
-#include"utility.h"
-#include"xml_msg.h"
+#include "glob.h"
+#include "sn_sckt.h"
+#include "utility.h"
+#include "xml_msg.h"
+
 #if 0
 /* not used any more */
 static u8 xml_fifo[XML_FILE_NAME_LEN];
@@ -85,31 +86,4 @@ u32 sctp_send_sock_recv_rpl(u8 *sn_ip,SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
 op_over:
 	close(sock_fd);
 	return ret;//if send the message and receive the ack successfully return 0;
-}
-int main()
-{
-	SOCK_MSG sockmsg;
-	RPL_MSG rplmsg;
-#if 0
-	/* not used any more */
-	bzero(xml_fifo,XML_FILE_NAME_LEN);
-	snprintf(xml_fifo,XML_FILE_NAME_LEN,"%d.xml_fifo",getpid());
-	if(atexit(rm_xml_fifo_at_exit) != 0){
-		perror("atexit");
-	}
-#endif
-	printf("client process -- %d\n",getpid());
-	sockmsg.type = SOCKMSG_TYPE_WRITE;
-	strcpy(sockmsg.file_name,"some might say.mp3");
-	strcpy(sockmsg.dest_ip,FS_SUPERNODE_IP);
-	if(sctp_send_sock_recv_rpl(sockmsg.dest_ip,&sockmsg,&rplmsg) != 0){
-		fprintf(stderr,"sctp_send_sock_recv_rpl fail!\n");
-		return 1;
-	}
-	if(rplmsg.err != RPL_OK){
-		fprintf(stderr,"rplmsg says some err happened!\n");
-		return 2;
-	}
-	printf("EVERYTHING IS JUST FINE!\n");
-	return 0;
 }
