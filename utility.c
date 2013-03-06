@@ -265,12 +265,11 @@ int sock_msg_to_buf_with_command_line_pipe(SOCK_MSG *sock_msg,u8 *buf,u32 bufsiz
 }
 
 // to get the host ip.
-char* get_host_ip()
+void get_host_ip(u8* host_ip)
 {
     char name[128];
     struct hostent *hent;
     int i;
-    char host_ip[INET_ADDRSTRLEN];
     gethostname(name,sizeof(name));
 
     hent=gethostbyname(name);
@@ -284,6 +283,5 @@ char* get_host_ip()
             break;
         }
     }
-    return host_ip;
 }
 #endif

@@ -21,6 +21,6 @@ _PROTOTYPE(inline void u64_to_str,(u64 i,char *buf,u32 bufsiz));
 _PROTOTYPE(void do_space_in_file_name,(u8 *str,u8 *dest));
 _PROTOTYPE(int rpl_msg_to_buf_with_command_line_pipe,(RPL_MSG *rpl_msg,u8 *buf,u32 bufsiz));
 _PROTOTYPE(int sock_msg_to_buf_with_command_line_pipe,(SOCK_MSG *sock_msg,u8 *buf,u32 bufsiz));
-_PROTOTYPE(char* get_host_ip,());
+_PROTOTYPE(void get_host_ip,(u8* host_ip));
 #endif
 #endif

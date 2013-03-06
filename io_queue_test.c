@@ -8,8 +8,9 @@ int main()
     meta_data->ioq.head=0;
     strcpy(meta_data->io_node_q_head,"");
     strcpy(meta_data->io_node_q_tail,"");
-    meta_data->replica_num=1;
+    meta_data->replica_num=2;
     strcpy(meta_data->my_rep[0].host_ip,"192.168.0.19");
+    strcpy(meta_data->my_rep[1].host_ip,"192.168.0.23");
     //strcpy(meta_data->my_rep[1].host_ip,"192.168.0.18");
     char * filename="lollipop";
     if(md_put(filename,meta_data)!=0)

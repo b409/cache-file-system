@@ -52,7 +52,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
     
     //get the host ip
     char host_ip[INET_ADDRSTRLEN];
-    strcpy(host_ip,get_host_ip()); 
+    get_host_ip(host_ip);
     
     Meta_Data *meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
     if(md_get(sock_msg->file_name,meta_data)==0)

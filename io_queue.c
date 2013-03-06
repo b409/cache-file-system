@@ -159,7 +159,7 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
         // if the replica was clean,we use the io_node_ptr to be the tail
         u32 i, replica_num=(*meta_data).replica_num;
         char host_ip[INET_ADDRSTRLEN];
-        strcpy(host_ip,get_host_ip());
+        get_host_ip(host_ip);
         for(i=0;i<replica_num;i++)
         {
             //如果ip是自己，那么不用修改
@@ -197,7 +197,7 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
         u8 dest_ip[INET_ADDRSTRLEN];
 
         u8 host_ip[INET_ADDRSTRLEN];
-        strcpy(host_ip,get_host_ip());
+        get_host_ip(host_ip);
 
         pid_t pid;
         for(i=0;i<replica_num;i++)
@@ -250,7 +250,7 @@ u32 remove_queue_out(const char* filename,IO_Type io_type)
         u8 dest_ip[INET_ADDRSTRLEN];
         
         u8 host_ip[INET_ADDRSTRLEN];
-        strcpy(host_ip,get_host_ip());
+        get_host_ip(host_ip);
         
         pid_t pid;
         for(i=0;i<replica_num;i++)
