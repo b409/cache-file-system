@@ -75,7 +75,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
             while(strlen(io_node_ptr)>1)
             {
                 printf("##################%s\n",io_node_ptr);
-                if(ion_get(io_node_ptr,io_node)!=0)
+                if(ion_get(io_node_ptr,io_node)==0)
                 {
                     u64 offset=(*io_node).offset;
                     u32 *data_size;//to put the real data size
