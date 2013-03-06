@@ -74,6 +74,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
             IO_Node *io_node=(IO_Node*)malloc(sizeof(IO_Node));
             while(strlen(io_node_ptr)>1)
             {
+                printf("##################%s\n",io_node_ptr);
                 if(ion_get(io_node_ptr,io_node)!=0)
                 {
                     u64 offset=(*io_node).offset;
