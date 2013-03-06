@@ -184,21 +184,19 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
     if(md_get(filename,meta_data)==0)
     {
         u32 i,replica_num=(*meta_data).replica_num;
-        u8* host_ip;
+        u8 host_ip[INET_ADDRSTRLEN];
         pid_t pid;
         for(i=0;i<replica_num;i++)
         {   
-            strcpy(host_ip,(*meta_data).my_rep[i].host_ip);
-        	
             // init a new process to deal with the message.
             if((pid=fork())==0)
-            {
+            {   
+                strcpy(host_ip,(*meta_data).my_rep[i].host_ip);
                 SOCK_MSG sockmsg;
 	            RPL_MSG rplmsg;
                 sockmsg.type=SOCKMSG_TYPE_WRITE;
                 strcpy(sockmsg.file_name,filename);
                 strcpy(sockmsg.dest_ip,host_ip);
-                printf("child pid:%d\n",getpid());
 	            if(sctp_send_sock_recv_rpl(sockmsg.dest_ip,&sockmsg,&rplmsg) != 0){
 		            fprintf(stderr,"sctp_send_sock_recv_rpl fail!\n");
 		            return 1;
@@ -207,7 +205,9 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
 		            fprintf(stderr,"rplmsg says some err happened!\n");
 		            return 1;
 	                }
-            }          
+                exit(0);
+            }
+            else{ sleep(1);}
         }
         free(meta_data);
     }

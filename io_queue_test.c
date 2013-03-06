@@ -6,8 +6,8 @@ int main()
     meta_data->ioq.tail=0;
     meta_data->ioq.head=0;
     meta_data->replica_num=2;
-    strcpy(meta_data->my_rep[0].host_ip,"192.168.0.18");
-    strcpy(meta_data->my_rep[1].host_ip,"192.168.0.19");
+    strcpy(meta_data->my_rep[0].host_ip,"192.168.0.19");
+    strcpy(meta_data->my_rep[1].host_ip,"192.168.0.18");
     char * filename="lollipop";
     if(md_put(filename,meta_data)!=0)
     {
@@ -18,12 +18,12 @@ int main()
     IO_Type io_type=WRITE;
     queue_in_wait(filename,io_type,now_time);
 
-    u8* data="hello world!\n";
-    u32 size=strlen(size);
+    u8* data="hello world!";
+    u32 size=strlen(data);
     u64 offset=0;
     write_queue_out(filename,io_type,now_time,offset,data,size);
     free(meta_data);
-/*    Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+/*  Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
     meta_data->ioq.tail=0;
     meta_data->ioq.head=0;
     char * filename="lollipop";
