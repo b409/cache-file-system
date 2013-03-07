@@ -46,10 +46,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
 {
 	/* A write operation happened on one of the other replicas,
 	 * update replica on this SN to consistent stat. */
-	u32 ret = 0;
-	//u8 cache_path[FILE_PATH_LEN];
-	//get_cache_path(SOCK_MSG_FN,cache_path);
-    
+	u32 ret = 0; 
     //get the host ip
     char host_ip[INET_ADDRSTRLEN];
     get_host_ip(host_ip);
@@ -79,13 +76,29 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
                     u64 offset=(*io_node).offset;
                     u32 data_size;//to put the real data size
                     u8 *real_data=iod_get(io_node_ptr,&data_size);
+	                u8 cache_path[FILE_PATH_LEN];
+	                get_cache_path(sock_msg->file_name,cache_path);
                     /******************************************************
                      *
                      * use the data_size /offset /real_data to do the update 
                      * of the replica
                      *
                      * ****************************************************/
-                    printf("@@@@@@@@@@@@@@@@@@@@@@%s   %d\n",real_data,data_size);
+                    //printf("@@@@@@@@@@@@@@@@@@@@@@%s   %d\n",real_data,data_size);
+                    u32 fd;
+                    if((fd=open(cache_path,O_WRONLY))==-1)
+                    {
+                        printf("Open file %s error!\n",sock_msg->file_name);
+                        ret=1;
+                    }
+                    if(lseek(fd,offset,SEEK_SET)==-1)
+                    {
+                        printf("Lseek file %s error!\n",sock_msg->file_name);
+                    }
+                    if(write(fd,real_data,data_size)!=data_size)
+                    {
+                        printf("Write file %s error!\n",sock_msg->file_name);
+                    }
                     strcpy(io_node_ptr,(*io_node).ion_next);
                 }
                 else

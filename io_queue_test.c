@@ -26,6 +26,16 @@ int main()
     u32 size=strlen(data);
     u64 offset=0;
     write_queue_out(filename,io_type,now_time,offset,data,size);
+    //free(meta_data);
+
+    time(&now_time);
+    io_type=WRITE;
+    queue_in_wait(filename,io_type,now_time);
+
+    data="go ahead!\n";
+    size=strlen(data);
+    offset=1;
+    write_queue_out(filename,io_type,now_time,offset,data,size);
     free(meta_data);
 
     //char host_ip[INET_ADDRSTRLEN];
