@@ -46,8 +46,8 @@
 #define DTC_FILE            00          /* dtc_file is taken as a replica with a DTC_FILE flag */
 #define CACHE_FILE          01        /* replica is a cache_file */
 #define _PROTOTYPE(function,params)		extern function()
-#define CACHE_PATH          "/mnt/supercache"   /* cache files are placed in this directory */
-#define DTC_PATH            "/mnt/dtcenter"     /* dtc file */
+#define CACHE_PATH          "/mnt/supercache/"   /* cache files are placed in this directory */
+#define DTC_PATH            "/mnt/dtcenter/"     /* dtc file */
 #define bzero(p,n)          memset(p,0,n)
 /* type definition */
 typedef uint8_t  u8;
