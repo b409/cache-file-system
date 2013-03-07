@@ -78,6 +78,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
                     u8 *real_data=iod_get(io_node_ptr,&data_size);
 	                u8 cache_path[FILE_PATH_LEN];
 	                get_cache_path(sock_msg->file_name,cache_path);
+                    printf("^^^^^^^^^^^^^^^^%s",cache_path);
                     /******************************************************
                      *
                      * use the data_size /offset /real_data to do the update 
@@ -88,16 +89,16 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
                     u32 fd;
                     if((fd=open(cache_path,O_WRONLY))==-1)
                     {
-                        printf("Open file %s error!\n",sock_msg->file_name);
+                        printf("Open file %s error!\n",cache_path);
                         ret=1;
                     }
                     if(lseek(fd,offset,SEEK_SET)==-1)
                     {
-                        printf("Lseek file %s error!\n",sock_msg->file_name);
+                        printf("Lseek file %s error!\n",cache_path);
                     }
                     if(write(fd,real_data,data_size)!=data_size)
                     {
-                        printf("Write file %s error!\n",sock_msg->file_name);
+                        printf("Write file %s error!\n",cache_path);
                     }
                     strcpy(io_node_ptr,(*io_node).ion_next);
                 }
