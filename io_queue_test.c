@@ -22,7 +22,7 @@ int main()
     IO_Type io_type=REMOVE;
     queue_in_wait(filename,io_type,now_time);
 
-    remove_queue_out(file_name,io_type);
+    remove_queue_out(filename,io_type);
     //u8* data="hello world!";
     //u32 size=strlen(data);
    // u64 offset=0;
