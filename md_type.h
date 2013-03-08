@@ -45,6 +45,7 @@ typedef struct{
 	char host_ip[INET_ADDRSTRLEN];
 	char starting_directory[FILE_PATH_LEN];
 	char io_node_ptr[IO_NODE_KEY_LEN];//if io_node_ptr was NULL means the replica was clean.
+    char updating_flag;
 }REPLICA;
 
 typedef struct{

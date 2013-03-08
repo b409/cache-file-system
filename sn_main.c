@@ -78,7 +78,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
                     u8 *real_data=iod_get(io_node_ptr,&data_size);
 	                u8 cache_path[FILE_PATH_LEN];
 	                get_cache_path(sock_msg->file_name,cache_path);
-                    printf("^^^^^^^^^^^^^^^^%s",cache_path);
+                    //printf("^^^^^^^^^^^^^^^^%s",cache_path);
                     /******************************************************
                      *
                      * use the data_size /offset /real_data to do the update 
@@ -110,6 +110,7 @@ u32 do_update_replica(SOCK_MSG *sock_msg,RPL_MSG *rpl_msg)
             }
             free(io_node);
             bzero((*meta_data).my_rep[i].io_node_ptr,IO_NODE_KEY_LEN);
+            (*meta_data).my_rep[i].updating_flag='0';
         }
         if(md_put(sock_msg->file_name,meta_data)!=0)
         {
@@ -223,52 +224,94 @@ int main()
 				continue;
 			perror("sctp_recvmsg");
 		}
-		/* dispose msg in child process */
-		if((pid = fork()) == 0){
-			/* in child process :
-			 * 1) convert xml_msg to sock_msg 
-			 * 2) call do_sock_msg deal with sock_msg and generate rpl_msg 
-			 * 3) convert rpl_msg to xml_msg 
-			 * 4) send xml_msg */
-			pid = getpid();
-			printf("%d -- Now in child process,dealing with sock_msg!\n",pid);
-#if 0
-			printf("%s",buf);
-#endif
-#if 1
+
+
+        #if 1
 			/* parse_xml from file descriptor */
 			if(buf_to_sock_msg_parse_from_fd(sock_msg,buf,XML_BUFSZ) != 0){
 				fprintf(stderr,"buf_to_sock_msg_parse_from_fd fail!\n");
 				exit(EXIT_FAILURE);
 			}
-#endif
-#if 1
-			printf("SOCK_MSG_TYPE   -- %c\n",SOCK_MSG_TYPE);
-			printf("SOCK_MSG_DST_IP -- %s\n",SOCK_MSG_DST_IP);
-			printf("SOCK_MSG_FN     -- %s\n",SOCK_MSG_FN);
-#endif
-			/*---------------------------------- convert xml_buf to sock_msg end  ---------------------------------------*/
-			/*---------------------------------------- do_sock_msg start ------------------------------------*/
-#if 1
-			if(do_sock_msg(sock_msg,rpl_msg) != 0){
-				fprintf(stderr,"do_sock_msg fail!\n");
-			}
-#endif
-			/*---------------------------------------- do_sock_msg end  ------------------------------------*/
-			/*-------------------------------- convert rpl_msg to xml_buf start ------------------------------*/
-			if(rpl_msg_to_buf(rpl_msg,buf,XML_BUFSZ) != 0){
-				fprintf(stderr,"buf_to_rpl_msg fail!\n");
-				exit(EXIT_FAILURE);
-			}
-			/*-------------------------------- convert rpl_msg to xml_buf end  ------------------------------*/
-			xml_msg_sz = strlen(buf);
-			if(sctp_sendmsg(sock_fd,buf,xml_msg_sz,(struct sockaddr*)&cliaddr,len,
-					0,0,sri.sinfo_stream,0,0) == -1){
-				fprintf(stderr,"process -- %d sctp_sendmsg fail!\n",getpid());
-				perror("sctp_sendmsg");
-			}
-			exit(EXIT_SUCCESS);
-		}
+        #endif
+        
+            Meta_Data *meta_data_f=(Meta_Data*)malloc(sizeof(Meta_Data));
+            if(md_get(sock_msg->file_name,meta_data_f)==0)
+            {
+                        
+                char host_ip_f[INET_ADDRSTRLEN];
+                get_host_ip(host_ip_f);
+                u32 i_f,replica_num_f=(*meta_data_f).replica_num;
+                REPLICA replica_f;
+                for(i_f=0;i<replica_num_f;i_f++)
+                {
+                    replica_f=(*meta_data_f).my_rep[i_f];
+                    if(strcmp(replica_f.host_ip,host_ip_f)==0)break;
+                }
+                if(((*meta_data_f).my_rep[i_f].updating_flag=='1') &&
+                        (sock_msg->type==SOCKMSG_TYPE_WRITE))continue;//this continue is to continue for(;;)
+                else
+                {
+                    (*meta_data_f).my_rep[i_f].updating_flag='1';
+                   if(md_put(sock_msg->file_name,meta_data_f)!=0)
+                   {
+                       printf("Put meta_data in father process error!\n");
+                       exit(EXIT_FAILURE);
+                   }
+
+		            /* dispose msg in child process */
+
+		            if((pid = fork()) == 0){
+			        /* in child process :
+			        * 1) convert xml_msg to sock_msg 
+			        * 2) call do_sock_msg deal with sock_msg and generate rpl_msg 
+			        * 3) convert rpl_msg to xml_msg 
+			        * 4) send xml_msg */
+		            	pid = getpid();
+		            	printf("%d -- Now in child process,dealing with sock_msg!\n",pid);
+                    #if 0
+		            	printf("%s",buf);
+                    #endif
+                    #if 1
+			            /* parse_xml from file descriptor */
+			            if(buf_to_sock_msg_parse_from_fd(sock_msg,buf,XML_BUFSZ) != 0){
+				            fprintf(stderr,"buf_to_sock_msg_parse_from_fd fail!\n");
+				            exit(EXIT_FAILURE);
+			            }
+                    #endif
+                    #if 1
+			            printf("SOCK_MSG_TYPE   -- %c\n",SOCK_MSG_TYPE);
+			            printf("SOCK_MSG_DST_IP -- %s\n",SOCK_MSG_DST_IP);
+			            printf("SOCK_MSG_FN     -- %s\n",SOCK_MSG_FN);
+                    #endif
+			        /*---------------------------------- convert xml_buf to sock_msg end  -------------------------------*/
+			        /*---------------------------------------- do_sock_msg start ------------------------------------*/
+                    #if 1
+			            if(do_sock_msg(sock_msg,rpl_msg) != 0){
+				            fprintf(stderr,"do_sock_msg fail!\n");
+			            }
+                    #endif
+			        /*---------------------------------------- do_sock_msg end  ------------------------------------*/
+			        /*-------------------------------- convert rpl_msg to xml_buf start ------------------------------*/
+			            if(rpl_msg_to_buf(rpl_msg,buf,XML_BUFSZ) != 0){
+				            fprintf(stderr,"buf_to_rpl_msg fail!\n");
+				            exit(EXIT_FAILURE);
+			            }
+			        /*-------------------------------- convert rpl_msg to xml_buf end  ------------------------------*/
+			            xml_msg_sz = strlen(buf);
+			            if(sctp_sendmsg(sock_fd,buf,xml_msg_sz,(struct sockaddr*)&cliaddr,len,
+					            0,0,sri.sinfo_stream,0,0) == -1){
+				            fprintf(stderr,"process -- %d sctp_sendmsg fail!\n",getpid());
+				            perror("sctp_sendmsg");
+			            }
+			            exit(EXIT_SUCCESS);
+		            }
+                }
+            }
+            else
+            {
+                printf("Get meta_data in father process error!\n");
+                exit(EXIT_FAILURE);
+            }
 	}
 	return 0;
 }
