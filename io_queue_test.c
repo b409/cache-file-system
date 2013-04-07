@@ -22,23 +22,23 @@ int main()
     IO_Type io_type=REMOVE;
     queue_in_wait(filename,io_type,now_time);
 
-    remove_queue_out(filename,io_type);
-    //u8* data="hello world!";
-    //u32 size=strlen(data);
-   // u64 offset=0;
-    //write_queue_out(filename,io_type,now_time,offset,data,size);
+    //remove_queue_out(filename,io_type);
+    u8* data="hello world!";
+    u32 size=strlen(data);
+    u64 offset=0;
+    write_queue_out(filename,io_type,now_time,offset,data,size);
     //free(meta_data);
 
-/*    time(&now_time);
+    time(&now_time);
     io_type=WRITE;
     queue_in_wait(filename,io_type,now_time);
 
     data="go ahead!\n";
     size=strlen(data);
-    offset=1;
+    offset=12;
     write_queue_out(filename,io_type,now_time,offset,data,size);
     free(meta_data);
-*/
+
     //char host_ip[INET_ADDRSTRLEN];
     //strcpy(host_ip,get_host_ip());
     //printf("!!!!!!!!!!!!!!!!!!!!!!!!!%s",host_ip);
