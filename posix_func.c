@@ -1,222 +1,77 @@
-#include"glob.h"
-#include"fs_socket.h"
-#include"sock_msg.h"
-int _CreateFile(char * path,u32 perm,int mode)
+#include "posix_func.h"
+#include "glob.h"
+#include "md_type.h"
+#include "utility.h"
+#include "io_queue.h"
+
+
+u32 _RemoveFile(u8 *path)
 {
-	char buf[BUFSIZ];
-	int fd;
-	/* First of all,get host ip via checking metadata */
-//	char * ip = get_host_ip(path);
-//	int fd = connect_super_node(ip);
-	/* send create_file OCR_MSG to super node */
-	OCR_MSG ocrmsg;
-	OCR_MSG * ocr_msg = &ocrmsg;
-	RPL_MSG rplmsg;
-	RPL_MSG * rpl_msg = &rplmsg;
-	int n = strlen(path);
-	if(n > FILE_PATH_LEN){
-		fprintf(stderr,"path too long!\n");
-		return -1;
-	}
-	OCR_MSG_TYPE = OCR_CREAT;
-	strncpy(OCR_MSG_FILE_NAME,path,n);
-    OCR_MSG_PERM = perm;
-	OCR_MSG_MODE = mode;
-	/* INIT RPL_MSG */
-	RPL_ERRNO = RPL_ERR_CREAT;
-	RPL_COUNT = 0;
-	if((fd = connect_super_node(FS_SUPERNODE_IP)) == -1){
-		fprintf(stderr,"connect_super_node fail!\n");
-		goto op_over;
-	}
-	if(send_ocr_msg(fd,ocr_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"send_ocr_msg fail!\n");
-		close(fd);
-		fd = -1;
-		goto op_over;
-	}
-	if(recv_rpl_msg(fd,rpl_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"recv_rpl_msg fail!\n");
-		close(fd);
-		fd = -1;
-		goto op_over;
-	}
-	if(RPL_ERRNO != RPL_OK){
-		close(fd);
-		fd = -1;
-	}
-op_over:
-	return fd;
-}
-int _OpenFile(char * path,int mode)
-{ 
-	char buf[BUFSIZ];
-	int fd;
-	/* First of all,get host ip via checking metadata */
-//	char * ip = get_host_ip(path);
-//	int fd = connect_super_node(ip);
-	/* send create_file OCR_MSG to super node */
-	OCR_MSG ocrmsg;
-	OCR_MSG * ocr_msg = &ocrmsg;
-	RPL_MSG rplmsg;
-	RPL_MSG * rpl_msg = &rplmsg;
-	int n = strlen(path);
-	if(n > FILE_PATH_LEN){
-		fprintf(stderr,"path too long!\n");
-		return -1;
-	}
-	OCR_MSG_TYPE = OCR_CREAT;
-	strncpy(OCR_MSG_FILE_NAME,path,n);
-    OCR_MSG_PERM = 0;
-	OCR_MSG_MODE = mode;
-	/* INIT RPL_MSG */
-	RPL_ERRNO = RPL_ERR_CREAT;
-	RPL_COUNT = 0;
-	if((fd = connect_super_node(FS_SUPERNODE_IP)) == -1){
-		fprintf(stderr,"connect_super_node fail!\n");
-		goto op_over;
-	}
-	if(send_ocr_msg(fd,ocr_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"send_ocr_msg fail!\n");
-		close(fd);
-		fd = -1;
-		goto op_over;
-	}
-	if(recv_rpl_msg(fd,rpl_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"recv_rpl_msg fail!\n");
-		close(fd);
-		fd = -1;
-		goto op_over;
-	}
-	if(RPL_ERRNO != RPL_OK){
-		close(fd);
-		fd = -1;
-	}
-op_over:
-	return fd;
-} 
-int _CloseFile(int fd)
-{
-	/* send close msg 
-	 * then close fd */
-	char buf[BUFSIZ];
-	int err = 0;
-	IO_MSG iomsg;
-	IO_MSG * io_msg = &iomsg;
-	IO_MSG_TYPE = IO_CLOSE;
-	IO_MSG_COUNT = 0;
-	IO_MSG_OFFSET = 0;
-	if(send_io_msg(fd,io_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"send_io_msg fail!\n");
-		err = 1;
-	}
-	return err;
-}
-int _RemoveFile(char * path)
-{
-	char buf[BUFSIZ];
-	int err = 0;
-	int fd;
-	RPL_MSG rplmsg;
-	RPL_MSG * rpl_msg = &rplmsg;
-	OCR_MSG ocrmsg;
-	OCR_MSG * ocr_msg = &ocrmsg;
-	int n = strlen(path);
-	if(n > FILE_PATH_LEN){
-		fprintf(stderr,"path too long!\n");
-		return -1;
-	}
-	OCR_MSG_TYPE = OCR_REMOVE;
-	OCR_MSG_PERM = 0;
-	OCR_MSG_MODE = 0;
-	strncpy(OCR_MSG_FILE_NAME,path,n);
-	if((fd = connect_super_node(FS_SUPERNODE_IP)) == -1){
-		fprintf(stderr,"connect_super_node fail!\n");
-		err = 1;
-		goto op_over;
-	}
-	if(send_ocr_msg(fd,ocr_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"send_ocr_msg fail!\n");
-		err = 2;
-		goto op_over;
-	}
-	if(recv_rpl_msg(fd,rpl_msg,buf,BUFSIZ) != 0){
-		fprintf(stderr,"send_ocr_msg fail!\n");
-		err = 3;
-	}
-op_over:
-	if(RPL_ERRNO != RPL_OK){
-		err = 4;
-	}
-	if(fd){close(fd);}
-	return err;
-}
-int _ReadFile(int fd,u8 * buf,u32 count,u64 offset)
-{
-	int err;
-	char msg_buf[BUFSIZ];
-	RPL_MSG rplmsg;
-	RPL_MSG * rpl_msg = &rplmsg;
-	IO_MSG iomsg;
-	IO_MSG * io_msg = &iomsg;
-	IO_MSG_TYPE = IO_READ;
-	IO_MSG_COUNT = count;
-	IO_MSG_OFFSET = offset;
-	if(send_io_msg(fd,io_msg,msg_buf,BUFSIZ) != 0){
-		err = -1;
-		goto op_over;
-	}
-	if(recv_rpl_msg(fd,rpl_msg,msg_buf,BUFSIZ) != 0){
-		err = -1;
-		goto op_over;
-	}
-	printf("RPL_COUNT == %d\n",RPL_COUNT);
-	if(RPL_ERRNO == RPL_OK){
-		if((err = recv_buf_msg(fd,buf,count)) <= 0){
-			fprintf(stderr,"recv_buf_msg : get data fail@!\n");
-		}
-	}
-op_over:
-	return err;
-}
-int _WriteFile(int fd,u8 * buf,u32 count,u64 offset)
-{
-	int err;
-	char msg_buf[BUFSIZ];
-	RPL_MSG rplmsg;
-	RPL_MSG * rpl_msg = &rplmsg;
-	IO_MSG iomsg;
-	IO_MSG * io_msg = &iomsg;
-	IO_MSG_TYPE = IO_READ;
-	IO_MSG_COUNT = count;
-	IO_MSG_OFFSET = offset;
-	if(send_io_msg(fd,io_msg,msg_buf,BUFSIZ) != 0){
-		err = -1;
-		goto op_over;
-	}
-	if(send_buf_msg(fd,buf,count) <= 0){
-		fprintf(stderr,"send_buf_msg fail!\n");
-		err = -1;
-		goto op_over;
-	}
-	if(recv_rpl_msg(fd,rpl_msg,msg_buf,BUFSIZ) != 0){
-		fprintf(stderr,"recv_rpl_msg fail@!\n");
-		err = -1;
-		goto op_over;
-	}
-	if(RPL_ERRNO == RPL_OK){
-		err = RPL_COUNT;
-	}
-op_over:
-	return err;
-}
-int dirread(int fd,struct stat **stat)
-{
-}
-struct stat * _stat(char * path)
-{
-}
-int _wstat(char * path,struct stat * st)
-{
+    char cache_path[FILE_PATH_LEN];
+    /*****************************************************
+     * you should do some hash to the path
+     * **************************************************/
+    get_cache_path(path,cache_path);
+    u32 ret;
+    time_t arrive_time;
+    IO_Type io_type=REMOVE;
+    queue_in_wait(path,io_type,arrive_time);
+
+    if(unlink(cache_path)!=0)
+    {
+        printf("Remove file in _RemoveFile error!\n");
+        return 1;
+    }
+
+    remove_queue_out(path,io_type,arrive_time);
+    return 0;
+    
 }
 
+u32 _ReadFile(u8 *path, u8 *buf, u32 count, u64 offset)
+{
+    
+    time_t arrive_time;
+    IO_Type io_type=READ;
+    queue_in_wait(path,io_type,arrive_time);
+    u32 already_queue_out=0;//the mark of read out early
+
+     Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+     if(md_get(path,meta_data)==0)
+     {
+         u32 head_next=((*meta_data).ioq.head+1)%IO_Q_LEN;
+         /*if one read comes after one read ,queue out early*/
+         if((*meta_data).ioq.io_q_node[head_next].io_type==READ)
+         {
+             read_queue_out(path,io_type,arrive_time);
+             already_queue_out=1;
+         }
+     }
+    
+    u8 cache_path[FILE_PATH_LEN];
+    /*****************************************************
+     * you should do some hash to the path
+     * **************************************************/
+    get_cache_path(path,cache_path);
+    u32 fd,read_size;
+    if((fd=open(cache_path,O_RDONLY))==-1)
+    {
+        printf("Open file in _ReadFile error!\n");
+        return 1;
+    }
+    if((read_size=read(fd,buffer,count))==-1)
+    {
+        printf("Read file in _ReadFile error!\n");
+        return 1;
+    }
+
+     if(already_queue_out==0)
+     {
+         read_queue_out(path,io_type,arrive_time);
+     }
+}
+
+u32 _WriteFile(u8 *path, u8 * buf, u32 count, u64 offset)
+{
+    
+}
