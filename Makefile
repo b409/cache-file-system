@@ -7,7 +7,7 @@ CC_OP = -g -o
 CFLAGS = -I/usr/local/include/libxml2
 LINK_LIB = -L/usr/local/lib -ltokyotyrant -ltokyocabinet -lbz2 -lresolv -lnsl -lc -ldl -lrt -lxml2 -lz -lm -lpthread -lsctp 
 OBJS_M = sn_main.o  make_xml.o parse_xml.o io_queue_test.o
-OBJS =  utility.o xml_msg.o io_queue.o tt_func.o sn_sckt.o
+OBJS =  utility.o xml_msg.o io_queue.o tt_func.o sn_sckt.o posix_for_s3.o
 
 ALL = sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test
 .PHONY : all sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test
