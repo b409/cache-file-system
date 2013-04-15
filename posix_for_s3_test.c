@@ -12,7 +12,7 @@ int main()
     //strcpy(meta_data->my_rep[0].host_ip,"192.168.0.19");
     //strcpy(meta_data->my_rep[1].host_ip,"192.168.0.243");
     //strcpy(meta_data->my_rep[1].host_ip,"192.168.0.18");
-    char * pathname="/mnt/hello.txt";
+    char * pathname="/mnt/supercache/hello.txt";
     struct stat stat_info;
     stat(pathname,&stat_info);
     meta_data->stat_info=stat_info;
@@ -20,7 +20,24 @@ int main()
     {
         printf("Put meta_data in main error\n");
     }
-    int fd=open("/mnt/hello.txt",O_RDONLY);
+    while(1)
+    {
+        if(md_get(pathname,meta_data)==0)
+        {
+        }
+        else{printf("***************error************\n");}
+    }
+    pathname="/mnt/supercache/b.txt";
+    if(md_put(pathname,meta_data)!=0)
+    {
+        printf("Put meta_data in main error\n");
+    }
+    pathname="/mnt/supercache/c.txt";
+    if(md_put(pathname,meta_data)!=0)
+    {
+        printf("Put meta_data in main error\n");
+    }
+    int fd=open("/mnt/supercache/hello.txt",O_RDONLY);
     char buf[256];
     size_t count=20;
     

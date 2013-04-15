@@ -17,8 +17,7 @@ ssize_t CfRead(int fd,void* buf,size_t count,const char* pathname)
              already_queue_out=1;
          }
      }
-     ssize_t ret=read(fd,buf,count);// do the real read operation.
-
+     int ret=1;
      if(already_queue_out==0)
      {
          read_queue_out(pathname,io_type,arrive_time);
@@ -34,7 +33,8 @@ size_t CfFwrite(const void* ptr,size_t size,size_t nmemb,FILE *stream,const char
     
     size_t ret=fwrite(ptr,size,nmemb,stream);//do the real write.
     
-    write_queue_out(pathname,io_type,arrive_time,nmemb,ptr,size);//should change it
+    u64 offset=0;char *data="never mind!";size_t size1=11;
+    write_queue_out(pathname,io_type,arrive_time,offset,data,size1);//should change it
     return ret;
 }
 

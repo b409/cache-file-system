@@ -4,15 +4,17 @@
 # <add> io_queue_test.o in OBJS_M
 
 CC_OP = -g -o
-CFLAGS = -I/usr/local/include/libxml2
-LINK_LIB = -L/usr/local/lib -ltokyotyrant -ltokyocabinet -lbz2 -lresolv -lnsl -lc -ldl -lrt -lxml2 -lz -lm -lpthread -lsctp 
+CFLAGS = -I/usr/local/include/libxml2 -I/usr/local/include
+LINK_LIB = -L/usr/local/lib -ltokyotyrant -ltokyocabinet -lbz2 -lresolv -lnsl -lc -ldl -lrt -lxml2 -lz -lm -lpthread -lsctp -lmicrohttpd
 OBJS_M = sn_main.o  make_xml.o parse_xml.o io_queue_test.o posix_for_s3_test.o
-OBJS =  utility.o xml_msg.o io_queue.o tt_func.o sn_sckt.o posix_for_s3.o
+OBJS =  utility.o xml_msg.o io_queue.o tt_func.o sn_sckt.o posix_for_s3.o object_response_header.o request_analysis.o  bucket_response_header.o delete_bucket.o xml.o container.o 
 
-ALL = sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test posix_for_s3_test
+ALL = sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test posix_for_s3_test s3
 .PHONY : all sn_main  mk_xml_to_stdout parse_xml_from_stdin io_queue_test posix_for_s3_test
-all : sn_main  xml_msg.o mk_xml_to_stdout parse_xml_from_stdin io_queue_test posix_for_s3_test
+all : sn_main  xml_msg.o mk_xml_to_stdout parse_xml_from_stdin io_queue_test posix_for_s3_test s3
 
+s3 : $(OBJS)
+	gcc $(CFLAGS) $(OBJS) $(CC_OP) s3 $(LINK_LIB)
 sn_main : sn_main.o xml_msg.o utility.o tt_func.o
 	gcc sn_main.o xml_msg.o utility.o tt_func.o $(CC_OP) sn_main $(LINK_LIB)
 io_queue_test : io_queue_test.o io_queue.o tt_func.o sn_sckt.o xml_msg.o utility.o

@@ -179,7 +179,7 @@ u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 
     }
     else
     {
-        printf("Get metadata in write_queue_out error!\n");
+        printf("Get metadata in write_queue_out error!@@@@@@@@@@@\n");
         return 1;
     }
     /* put the data in TT*/
