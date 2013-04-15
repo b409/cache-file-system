@@ -3,6 +3,28 @@
 
 int main()
 {
-
+    Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+    meta_data->ioq.tail=0;
+    meta_data->ioq.head=0;
+    strcpy(meta_data->io_node_q_head,"");
+    strcpy(meta_data->io_node_q_tail,"");
+    //meta_data->replica_num=2;
+    //strcpy(meta_data->my_rep[0].host_ip,"192.168.0.19");
+    //strcpy(meta_data->my_rep[1].host_ip,"192.168.0.243");
+    //strcpy(meta_data->my_rep[1].host_ip,"192.168.0.18");
+    char * pathname="/mnt/hello.txt";
+    struct stat stat_info;
+    stat(pathname,&stat_info);
+    meta_data->stat_info=stat_info;
+    if(md_put(pathname,meta_data)!=0)
+    {
+        printf("Put meta_data in main error\n");
+    }
+    int fd=open("/mnt/hello.txt",O_RDONLY);
+    char buf[256];
+    size_t count=20;
+    
+    ssize_t read_num=CfRead(fd,buf,count,pathname); 
+    printf("%s\n",buf);
     return 0;
 }

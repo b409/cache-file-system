@@ -1,0 +1,4 @@
+#!/bin/bash
+ttserver -host 192.168.0.18 -port 11211 -thnum 8 -dmn -pid /ttserver/md_ttserver/md_ttserver.pid -log /ttserver/md_ttserver/md_ttserver.log -le -ulog /ttserver/md_ttserver/ -ulim 128m -sid 18 -rts /ttserver/md_ttserver/md_ttserver.rts /ttserver/md_ttserver/meta_data.tch#lmemb=1024#nmemb=2048#bnum=10000000 
+ttserver -host 192.168.0.18 -port 11212 -thnum 8 -dmn -pid /ttserver/ion_ttserver/ion_ttserver.pid -log /ttserver/ion_ttserver/ion_ttserver.log -le -ulog /ttserver/ion_ttserver/ -ulim 128m -sid 18 -rts /ttserver/ion_ttserver/ion_ttserver.rts /ttserver/ion_ttserver/ion_data.tch#lmemb=1024#nmemb=2048#bnum=10000000 
+ttserver -host 192.168.0.18 -port 11215 -thnum 8 -dmn -pid /ttserver/iod_ttserver/iod_ttserver.pid -log /ttserver/iod_ttserver/iod_ttserver.log -le -ulog /ttserver/iod_ttserver/ -ulim 128m -sid 18 -rts /ttserver/iod_ttserver/iod_ttserver.rts /ttserver/iod_ttserver/iod_data.tch#lmemb=1024#nmemb=2048#bnum=10000000 

@@ -1,4 +1,4 @@
-#include "io_queue.h"
+#include "posix_for_s3.h"
 ssize_t CfRead(int fd,void* buf,size_t count,const char* pathname)
 {
     time_t arrive_time;
@@ -34,9 +34,10 @@ size_t CfFwrite(const void* ptr,size_t size,size_t nmemb,FILE *stream,const char
     
     size_t ret=fwrite(ptr,size,nmemb,stream);//do the real write.
     
-    write_queue_out(pathname,io_type,arrive_time,offset,data,size);
+    write_queue_out(pathname,io_type,arrive_time,nmemb,ptr,size);//should change it
     return ret;
 }
+
 u32 CfRemove(const char* pathname)
 {
     time_t arrive_time;

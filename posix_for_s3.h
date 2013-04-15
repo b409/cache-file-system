@@ -1,6 +1,7 @@
 #ifndef POSIX_FOR_S3
 #define POSIX_FOR_S3
-
+#include "glob.h"
+#include "md_type.h"
 
 ssize_t CfRead(int fd,void* buf,size_t count,const char* pathname);
 
