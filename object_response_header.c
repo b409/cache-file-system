@@ -1372,6 +1372,12 @@ int iterate_put (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,con
 		con_info->answercode = MHD_HTTP_INTERNAL_SERVER_ERROR;
 		if (0 != strcmp (key, "file"))
 			return MHD_NO;
+        char pathname[256];
+        get_cache_path(filename,pathname);
+       // time_t arrive_time;
+        //time(&arrive_time);
+        //IO_Type io_type=WRITE;
+
 		if (!con_info->fp)
 		{
 
@@ -1382,19 +1388,23 @@ int iterate_put (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,con
 				con_info->answercode = MHD_HTTP_FORBIDDEN;
 				return MHD_NO;
 			}
-			con_info->fp = fopen (filename, "ab");
+			/*************add by Jin:io_queue***************/
+            //queue_in_wait(pathname,io_type,arrive_time);
+            /***********************************************/
+            con_info->fp = fopen (pathname, "wb");
 			if (!con_info->fp)
 			return MHD_NO;
 		}
 		if (size > 0)
 		{
-            char pathname[256];
-            get_cache_path(filename,pathname);
-			if (!CfFwrite (data, size, sizeof (char), con_info->fp,pathname))
+			if (!fwrite (data, size, sizeof (char), con_info->fp))
 			return MHD_NO;
 		}
 		con_info->answerstring = completepage;
 		con_info->answercode = MHD_HTTP_OK;
+        
+        //u64 offset1=0;char *data1="never mind!";size_t size1=11;
+        //write_queue_out(pathname,io_type,arrive_time,offset1,data1,size1);//should change it
 		return MHD_YES;
 	}
 
@@ -1538,6 +1548,12 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
 	printf(" key is not file! quit out! \n");
     return MHD_NO;
 }
+
+    char pathname[256];
+    get_cache_path(filename,pathname);
+    //time_t arrive_time;
+    //time(&arrive_time);
+    //IO_Type io_type=WRITE;
   if (!con_info->fp)
     {
       if (NULL != (fp = fopen (filename, "rb")))
@@ -1548,25 +1564,26 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
           return MHD_NO;
         }
 
-      char pathname[256];
-      get_cache_path(filename,pathname);
      // con_info->fp = fopen (filename, "ab");
+   /**************************add by Jin************/
     
-      con_info->fp = fopen (pathname, "ab");
+   // queue_in_wait(pathname,io_type,arrive_time);
+    /**********************************************/
+      con_info->fp = fopen (pathname, "wb");
       if (!con_info->fp)
         return MHD_NO;
     }
 
   if (size > 0)
     {
-      char pathname[256];
-      get_cache_path(filename,pathname);
-      if (!CfFwrite (data, size, sizeof (char), con_info->fp,pathname))
+      if (!fwrite (data, size, sizeof (char), con_info->fp))
         return MHD_NO;
     }
 
   con_info->answerstring = completepage;
   con_info->answercode = MHD_HTTP_OK;
+  //u64 offset1=0;char *data1="never mind!";size_t size1=11;
+  //write_queue_out(pathname,io_type,arrive_time,offset1,data1,size1);//should change it
 
   return MHD_YES;
 }

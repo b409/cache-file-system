@@ -125,7 +125,7 @@ request_get(void *cls, struct MHD_Connection *connection,
 	
 	printf("PATHNAME is %s,URL is %s\n",pathname,url);
 
-	if ( (-1 == (fd = open (pathname_mnt, O_RDONLY))) ||(0 != fstat (fd, &sbuf)) )
+    if ( (-1 == (fd = open (pathname_mnt, O_RDONLY))) ||(0 != fstat (fd, &sbuf)) )
 	{
 	
 		if (fd != -1) 
@@ -140,6 +140,7 @@ request_get(void *cls, struct MHD_Connection *connection,
 			ret =MHD_queue_response (connection, MHD_HTTP_INTERNAL_SERVER_ERROR,response);
 				
 			MHD_destroy_response (response);
+
 			return MHD_YES;
 		}
 		
@@ -148,35 +149,33 @@ request_get(void *cls, struct MHD_Connection *connection,
 	}
 	printf("*************196 line create response**************\n");
 
-//*******************************************************
+/*******************************************************
     time_t arrive_time;
+    time(&arrive_time);
     IO_Type io_type=READ;
-    char ab_pathname[256];
-    get_cache_path(pathname,ab_pathname);
-    queue_in_wait(ab_pathname,io_type,arrive_time);
+    queue_in_wait(pathname_mnt,io_type,arrive_time);
     int already_queue_out=0;//the mark of read out early
 
      Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
-     if(md_get(ab_pathname,meta_data)==0)
+     if(md_get(pathname_mnt,meta_data)==0)
      {
          u32 head_next=((*meta_data).ioq.head+1)%IO_Q_LEN;
-         /*if one read comes after one read ,queue out early*/
          if((*meta_data).ioq.io_q_node[head_next].io_type==READ)
          {
-             read_queue_out(ab_pathname,io_type,arrive_time);
+             read_queue_out(pathname_mnt,io_type,arrive_time);
              already_queue_out=1;
          }
      }
-//*******************************************
+*/
 
      response =MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
 
-    //***********************************************
+/***********************************************
      if(already_queue_out==0)
      {
-         read_queue_out(ab_pathname,io_type,arrive_time);
+         read_queue_out(pathname_mnt,io_type,arrive_time);
      }
-//***********************************************
+*/
 	if(response)
 	{
 		//MHD_add_response_header (response, "Content-Type", MIMETYPE);
@@ -432,7 +431,7 @@ request_delete(void *cls, struct MHD_Connection *connection,         \
 	get_sonstr(url,pathname);
         memset(pathname_mnt,0,sizeof(pathname_mnt));
         strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
-		if(CfRemove(pathname_mnt)<0)
+		if(remove(pathname_mnt)<0)
 		{
 			perror("490 line DELETE request_delete remove \n");
 			return 0;
@@ -758,7 +757,7 @@ request_post(void *cls, struct MHD_Connection *connection,         \
               return MHD_NO;
             }
 
-          nr_of_uploading_clients++;
+         // nr_of_uploading_clients++;
 
           con_info->connectiontype = POST;
           con_info->answercode = MHD_HTTP_OK;

@@ -34,7 +34,7 @@
 #define CH_SPACE            0x20
 #define FILE_PATH_LEN       260    /* file_name length */
 #define IO_NODE_KEY_LEN     260  /* IO_Node key length */
-#define IO_Q_LEN            50          /* I/O on a file is lined in queue */ 
+#define IO_Q_LEN            256          /* I/O on a file is lined in queue */ 
 #define REPLICA_NUM         3        /* Replica number */
 /* replica consistent stat */
 #define REP_CONSISTENT      00    /* replica is in consistent stat */
@@ -55,7 +55,7 @@ typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
 typedef void Sigfunc(int);
-typedef enum{READ,WRITE,REMOVE} IO_Type;
+typedef enum{READ=1,WRITE,REMOVE} IO_Type;
 #if 0
 /* define xml_fifo file name len for mk_xml and parse_xml */
 /* not used any more */

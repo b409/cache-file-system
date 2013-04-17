@@ -18,8 +18,8 @@
 */
 u32 queue_in_wait(const char* filename,IO_Type io_type,time_t arrive_time)
 {
+    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     Meta_Data *meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
-
     //To get the metadata,then change it and update it.
     if(md_get(filename,meta_data)==0)
     {
@@ -42,14 +42,17 @@ u32 queue_in_wait(const char* filename,IO_Type io_type,time_t arrive_time)
  //to wait the IO to be the head.
   while(1)
     {
+        printf("**************************************queue_in_while!\n");
         if(md_get(filename,meta_data)==0)
         {
             IO_Q io_q=(*meta_data).ioq;
             u32 head=io_q.head;
+            printf("!!!!!!!!@@@@@@@@@@@@@@@@@@@head:%d\n",head);
             IO_Q_Node io_q_node=io_q.io_q_node[head];
             if((io_q_node.io_type==io_type)&&
                 (io_q_node.arrive_time==arrive_time))
             {
+                printf("####################################################################################################################\n");
                 free(meta_data);
                 return 0;
             }
@@ -72,6 +75,7 @@ u32 queue_in_wait(const char* filename,IO_Type io_type,time_t arrive_time)
  */
 u32 read_queue_out(const char* filename,IO_Type io_type,time_t arrive_time)
 {
+    printf("#################################################read_queue_out!\n");
     Meta_Data *meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
     if(md_get(filename,meta_data)==0)
     {
@@ -102,6 +106,7 @@ u32 read_queue_out(const char* filename,IO_Type io_type,time_t arrive_time)
  */
 u32 write_queue_out(const char* filename,IO_Type io_type,time_t arrive_time,u64 offset,char *data,size_t size)
 {
+    printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@write_queue_out\n");
     //path is the key to put the data in the TT
     char path[IO_NODE_KEY_LEN];
     sprintf(path, "%s_%ld", filename, arrive_time); 

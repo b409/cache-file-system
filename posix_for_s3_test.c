@@ -20,13 +20,13 @@ int main()
     {
         printf("Put meta_data in main error\n");
     }
-    while(1)
+    /*while(1)
     {
         if(md_get(pathname,meta_data)==0)
         {
         }
         else{printf("***************error************\n");}
-    }
+    }*/
     pathname="/mnt/supercache/b.txt";
     if(md_put(pathname,meta_data)!=0)
     {
@@ -37,11 +37,6 @@ int main()
     {
         printf("Put meta_data in main error\n");
     }
-    int fd=open("/mnt/supercache/hello.txt",O_RDONLY);
-    char buf[256];
-    size_t count=20;
     
-    ssize_t read_num=CfRead(fd,buf,count,pathname); 
-    printf("%s\n",buf);
     return 0;
 }

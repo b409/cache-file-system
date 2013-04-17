@@ -1,5 +1,9 @@
 #include "container.h"
 #include "request_analysis.h"
+#include "xml.h"
+#include "glob.h"
+#include "md_type.h"
+#include "io_queue.h"
 
 #define PORT 8888
 /*
@@ -22,33 +26,83 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
   */
  // json_object * Response_page = json_object_new_object();
   //json_object * Response_heads = json_object_new_object();
-  const char *page = "hello, clound store!";
+  const char *page = "hello, cloud store!";
   struct MHD_Response *response;
 	puts(page);
   //int ret;
-  
+char pathname[128];
+char pathname_mnt[128];
+get_sonstr(url,pathname);
+memset(pathname_mnt,0,sizeof(pathname_mnt));
+strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
+
+    printf("pathname %s     pathname_mnt  %s  \n",pathname,pathname_mnt);
+
   if (strcmp(method,"GET") == 0)
   {
+    printf("haha\n");
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);
+   /******************add by Jin*********************************/ 
+    time_t arrive_time;
+    time(&arrive_time);
+    IO_Type io_type=READ;
+    queue_in_wait(pathname_mnt,io_type,arrive_time);
+    int already_queue_out=0;//the mark of read out early
+
+     Meta_Data * meta_data=(Meta_Data*)malloc(sizeof(Meta_Data));
+     if(md_get(pathname_mnt,meta_data)==0)
+     {
+         u32 head_next=((*meta_data).ioq.head+1)%IO_Q_LEN;
+         /*if one read comes after one read ,queue out early*/
+         if((*meta_data).ioq.io_q_node[head_next].io_type==READ)
+         {
+             read_queue_out(pathname_mnt,io_type,arrive_time);
+             already_queue_out=1;
+         }
+     }
+     /*******************************************************/
     request_get(cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size, con_cls);
+    
+     if(already_queue_out==0)
+     {
+         read_queue_out(pathname_mnt,io_type,arrive_time);
+     }
 	return 1;
   }    
   else if (strcmp(method,"PUT") == 0)
   {
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);
+
+    /******************************************************/
+    time_t arrive_time;
+    time(&arrive_time);
+    IO_Type io_type=WRITE;
+    queue_in_wait(pathname_mnt,io_type,arrive_time);
+   /********************************************************/
     request_put( cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size,con_cls);
+   /*********************************************************/ 
+    u64 offset=0;char *data="never mind!";size_t size1=11;
+    write_queue_out(pathname_mnt,io_type,arrive_time,offset,data,size1);//should change it
+    /*********************************************************/
 	return 1;
   }
   else if (strcmp(method,"DELETE") == 0)
   {
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);    
+    /************************************************/
+    time_t arrive_time;
+    time(&arrive_time);
+    IO_Type io_type=REMOVE;
+    queue_in_wait(pathname_mnt,io_type,arrive_time);
+    /************************************************/
 	request_delete( cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size,con_cls);
+    remove_queue_out(pathname_mnt,io_type);
   }
   else if (strcmp(method,"HEAD") == 0)
   {
@@ -61,10 +115,21 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 
  else if (strcmp(method,"POST") == 0)
   {
+      printf("()()()()\n");
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);
+    /******************************************************/
+    time_t arrive_time;
+    time(&arrive_time);
+    IO_Type io_type=WRITE;
+    queue_in_wait(pathname_mnt,io_type,arrive_time);
+   /********************************************************/
     request_post(cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size, con_cls);
+   /*********************************************************/ 
+    u64 offset=0;char *data="never mind!";size_t size1=11;
+    write_queue_out(pathname_mnt,io_type,arrive_time,offset,data,size1);//should change it
+    /*********************************************************/
 	return 1;
   }
   else
