@@ -1589,7 +1589,7 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
 }
 
 
-void
+/*void
 request_completed (void *cls, struct MHD_Connection *connection,
                    void **con_cls, enum MHD_RequestTerminationCode toe)
 {
@@ -1612,7 +1612,7 @@ request_completed (void *cls, struct MHD_Connection *connection,
 
   free (con_info);
   *con_cls = NULL;
-}
+}*/
 
 
 int Gen_Date(char *date)

@@ -117,7 +117,8 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
   {
       printf("()()()()\n");
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
-	printf("%s New %s request for %s using version %s",__func__, method, url, version);
+	printf("%s New %s request for %s using version %s\n",__func__, method, url, version);
+    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!up_load_size:%u  %s\n",upload_data_size,upload_data);
     /******************************************************/
     time_t arrive_time;
     time(&arrive_time);
@@ -139,6 +140,11 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
   return 0;
 }
 
+void request_completed(void* cls,struct MHD_Connection *connection, 
+                       void **con_cls,enum MHD_RequestTerminationCode toe)
+{
+    printf("###################################### in request_completted\n");
+}
 int
 main ()
 {
@@ -147,7 +153,8 @@ main ()
   struct MHD_Daemon *daemon;
 
   daemon = MHD_start_daemon (MHD_USE_THREAD_PER_CONNECTION, PORT, NULL, NULL,
-                             &answer_to_connection, NULL, MHD_OPTION_END);
+                             &answer_to_connection, NULL, MHD_OPTION_NOTIFY_COMPLETED,
+                             &request_completed,NULL,MHD_OPTION_END);
   if (NULL == daemon)
 	{   
 		printf("start daemon failed!\n");		

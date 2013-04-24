@@ -20,13 +20,14 @@ int main()
     {
         printf("Put meta_data in main error\n");
     }
-    /*while(1)
+    while(1)
     {
         if(md_get(pathname,meta_data)==0)
         {
         }
         else{printf("***************error************\n");}
-    }*/
+    }
+    /*
     pathname="/mnt/supercache/b.txt";
     if(md_put(pathname,meta_data)!=0)
     {
@@ -37,6 +38,7 @@ int main()
     {
         printf("Put meta_data in main error\n");
     }
+    */
     
     return 0;
 }
