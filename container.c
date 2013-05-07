@@ -143,7 +143,7 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
 void request_completed(void* cls,struct MHD_Connection *connection, 
                        void **con_cls,enum MHD_RequestTerminationCode toe)
 {
-    printf("###################################### in request_completted\n");
+    printf(" in request_completted\n");
 }
 int
 main ()
