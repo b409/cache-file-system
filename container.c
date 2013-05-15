@@ -44,7 +44,7 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);
    /******************add by Jin*********************************/ 
-    time_t arrive_time;
+    /*time_t arrive_time;
     time(&arrive_time);
     IO_Type io_type=READ;
     queue_in_wait(pathname_mnt,io_type,arrive_time);
@@ -54,21 +54,21 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
      if(md_get(pathname_mnt,meta_data)==0)
      {
          u32 head_next=((*meta_data).ioq.head+1)%IO_Q_LEN;
-         /*if one read comes after one read ,queue out early*/
+         //if one read comes after one read ,queue out early
          if((*meta_data).ioq.io_q_node[head_next].io_type==READ)
          {
              read_queue_out(pathname_mnt,io_type,arrive_time);
              already_queue_out=1;
          }
-     }
+     }*/
      /*******************************************************/
     request_get(cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size, con_cls);
     
-     if(already_queue_out==0)
+    /* if(already_queue_out==0)
      {
          read_queue_out(pathname_mnt,io_type,arrive_time);
-     }
+     }*/
 	return 1;
   }    
   else if (strcmp(method,"PUT") == 0)
@@ -77,16 +77,16 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);
 
     /******************************************************/
-    time_t arrive_time;
+    /*time_t arrive_time;
     time(&arrive_time);
     IO_Type io_type=WRITE;
-    queue_in_wait(pathname_mnt,io_type,arrive_time);
+    queue_in_wait(pathname_mnt,io_type,arrive_time);*/
    /********************************************************/
     request_put( cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size,con_cls);
    /*********************************************************/ 
-    u64 offset=0;char *data="never mind!";size_t size1=11;
-    write_queue_out(pathname_mnt,io_type,arrive_time,offset,data,size1);//should change it
+    /*u64 offset=0;char *data="never mind!";size_t size1=11;
+    write_queue_out(pathname_mnt,io_type,arrive_time,offset,data,size1);//should change it*/
     /*********************************************************/
 	return 1;
   }
@@ -95,14 +95,14 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
 	printf("%s New %s request for %s using version %s",__func__, method, url, version);    
     /************************************************/
-    time_t arrive_time;
+   /* time_t arrive_time;
     time(&arrive_time);
     IO_Type io_type=REMOVE;
-    queue_in_wait(pathname_mnt,io_type,arrive_time);
+    queue_in_wait(pathname_mnt,io_type,arrive_time);*/
     /************************************************/
 	request_delete( cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size,con_cls);
-    remove_queue_out(pathname_mnt,io_type);
+    //remove_queue_out(pathname_mnt,io_type);
   }
   else if (strcmp(method,"HEAD") == 0)
   {
@@ -120,16 +120,16 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
 	printf("%s New %s request for %s using version %s\n",__func__, method, url, version);
     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!up_load_size:%u  %s\n",upload_data_size,upload_data);
     /******************************************************/
-    time_t arrive_time;
+    /*time_t arrive_time;
     time(&arrive_time);
     IO_Type io_type=WRITE;
-    queue_in_wait(pathname_mnt,io_type,arrive_time);
+    queue_in_wait(pathname_mnt,io_type,arrive_time);*/
    /********************************************************/
     request_post(cls,  connection, url,  method, version,  upload_data, 
 		upload_data_size, con_cls);
    /*********************************************************/ 
-    u64 offset=0;char *data="never mind!";size_t size1=11;
-    write_queue_out(pathname_mnt,io_type,arrive_time,offset,data,size1);//should change it
+    /*u64 offset=0;char *data="never mind!";size_t size1=11;
+    write_queue_out(pathname_mnt,io_type,arrive_time,offset,data,size1);//should change it*/
     /*********************************************************/
 	return 1;
   }
