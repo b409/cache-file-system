@@ -1521,7 +1521,7 @@ send_page (struct MHD_Connection *connection, const char *page,
   MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
   ret = MHD_queue_response (connection, status_code, response);
   MHD_destroy_response (response);
-
+  printf("######################################%d\n",getpid());
   return ret;
 }
 
@@ -1535,11 +1535,47 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
   struct connection_info_struct *con_info = coninfo_cls;
   FILE *fp;
 
-
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("key:%s\n",key);
+    printf("filename:%s\n",filename);
+    printf("transfer_enconding:%s\n",transfer_encoding);
+    printf("content_type:%s\n",content_type);
+    printf("data:%s\n",data);
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 	printf("now in iterate_post!\n");
 //	printf("the data is : %s\n",data);
 	printf("the data size is %d \n",size);
-	
+
+
+
+//********************************20130515***************************
+
+
+
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~IP of client is : %s\n",con_info->ip);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//********************************20130515*****************************
+
+
+
+
+
+
+
+
   con_info->answerstring = servererrorpage;
   con_info->answercode = MHD_HTTP_INTERNAL_SERVER_ERROR;
 
@@ -1551,6 +1587,7 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
 
     char pathname[256];
     get_cache_path(filename,pathname);
+    printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%d\n",getpid());
     //time_t arrive_time;
     //time(&arrive_time);
     //IO_Type io_type=WRITE;

@@ -621,7 +621,6 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 		//*****************add to generate a bucket or object name
 		char *bucket_object[128];
 	
-	
 		temp=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
 		printf("request_analysis 934 line host is %s\n",temp);
 		strncpy(b_host,temp,strlen(temp)+1);

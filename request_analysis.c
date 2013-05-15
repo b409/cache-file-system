@@ -38,7 +38,6 @@ request_get(void *cls, struct MHD_Connection *connection,
 	get_sonstr(url,pathname);
         memset(pathname_mnt,0,sizeof(pathname_mnt));
         strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
-        
 		pathname_xml=my_itoa(getpid());
 	
   	//if(strcmp(url,"/")==0) {
@@ -662,7 +661,6 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 		//*****************add to generate a bucket or object name
 		char *bucket_object[128];
 	
-	
 		temp=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
 		printf("request_analysis 934 line host is %s\n",temp);
 		strncpy(b_host,temp,strlen(temp)+1);
@@ -743,7 +741,20 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 	//	cheek=MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "user");
 		
 	//	printf("cheek  is  %s \n",cheek);
+    
 
+
+//**********************20130515****************************************
+
+    char* ip;
+	ip=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Ip");
+    printf("ip is %s\n",ip);
+    strcpy(con_info->ip,ip);
+    
+	printf("request_analusis.c :the ip of client  is %s   &&    %s(con_info->ip)\n",ip,con_info->ip);
+
+
+//**********************20130515***************************************
 
       if (0 == strcmp (method, "POST"))
         {
@@ -787,7 +798,7 @@ request_post(void *cls, struct MHD_Connection *connection,         \
         {
           MHD_post_process (con_info->postprocessor, upload_data,
                             *upload_data_size);
-          *upload_data_size = 0;
+         *upload_data_size = 0;
 
           return MHD_YES;
         }
