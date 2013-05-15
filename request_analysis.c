@@ -663,6 +663,8 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 	
 		temp=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
 		printf("request_analysis 934 line host is %s\n",temp);
+        char* client_ip;
+	    client_ip=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Ip");
 		strncpy(b_host,temp,strlen(temp)+1);
 		strtok(b_host, delim);
 		strncpy(pathname,b_host,strlen(b_host)+1);
@@ -679,7 +681,7 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 	strncpy(send_header.Connection,"close",strlen("close")+1);
 	printf("request_analysis.c 95line  date is %s \n",send_header.Connection);
 
-	strncpy(send_header.Pathname,url,strlen(url)+1);
+	strncpy(send_header.Pathname,url+1,strlen(url));
 	printf("request_analysis.c 98 line  url is %s \n",send_header.Pathname);
 	//***************************sender_head end
 
@@ -725,7 +727,7 @@ request_post(void *cls, struct MHD_Connection *connection,         \
       struct connection_info_struct *con_info;
 
       if (nr_of_uploading_clients >= MAXCLIENTS)
-        return send_page (connection, busypage, MHD_HTTP_SERVICE_UNAVAILABLE);
+        return send_page (connection, busypage, MHD_HTTP_SERVICE_UNAVAILABLE,send_header.Pathname,client_ip);
 
       con_info = malloc (sizeof (struct connection_info_struct));
       if (NULL == con_info)
@@ -746,13 +748,9 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 
 //**********************20130515****************************************
 
-    char* ip;
-	ip=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Ip");
-    printf("ip is %s\n",ip);
-    strcpy(con_info->ip,ip);
-    
-	printf("request_analusis.c :the ip of client  is %s   &&    %s(con_info->ip)\n",ip,con_info->ip);
-
+    //printf("ip is %s\n",ip);
+    strcpy(con_info->client_ip,client_ip);
+	//printf("request_analusis.c :the ip of client  is %s   &&    %s(con_info->ip)\n",ip,con_info->ip);
 
 //**********************20130515***************************************
 
@@ -787,7 +785,7 @@ request_post(void *cls, struct MHD_Connection *connection,         \
       char buffer[1024];
 
       snprintf (buffer, sizeof (buffer), askpage, nr_of_uploading_clients);
-      return send_page (connection, buffer, MHD_HTTP_OK);
+      return send_page (connection, buffer, MHD_HTTP_OK,send_header.Pathname,client_ip);
     }
 
   if (0 == strcmp (method, "POST"))
@@ -812,12 +810,12 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 	}
 	  /* Now it is safe to open and inspect the file before calling send_page with a response */
 	  return send_page (connection, con_info->answerstring,
-			    con_info->answercode);
+			    con_info->answercode,send_header.Pathname,client_ip);
 	}
 
     }
 
-  return send_page (connection, errorpage, MHD_HTTP_BAD_REQUEST);
+  return send_page (connection, errorpage, MHD_HTTP_BAD_REQUEST,send_header.Pathname,client_ip);
 }
 
 

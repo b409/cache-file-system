@@ -64,7 +64,7 @@ struct MHD_PostProcessor *postprocessor;
 FILE *fp;
 const char *answerstring;
 int answercode;
-char ip[128];
+char client_ip[128];
 };
 
 static const char *askpage = "<html><body>\n\

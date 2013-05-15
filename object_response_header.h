@@ -64,7 +64,7 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
               size_t size);
 
 
- int  send_page (struct MHD_Connection *connection, const char *page,int status_code);
+ int  send_page (struct MHD_Connection *connection, const char *page,int status_code,const char *pathname, const char *client_ip);
 
 
 #endif

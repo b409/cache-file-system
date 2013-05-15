@@ -1508,7 +1508,7 @@ void post_request_completed (void *cls, struct MHD_Connection *connection,void *
 
  int
 send_page (struct MHD_Connection *connection, const char *page,
-           int status_code)
+           int status_code,const char *pathname,const char *client_ip)
 {
   int ret;
   struct MHD_Response *response;
@@ -1521,7 +1521,16 @@ send_page (struct MHD_Connection *connection, const char *page,
   MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
   ret = MHD_queue_response (connection, status_code, response);
   MHD_destroy_response (response);
-  printf("######################################%d\n",getpid());
+  char from_path[128];
+  char to_path[128];
+  sprintf(from_path,"/mnt/supercache/%s.%s",pathname,client_ip);
+  sprintf(to_path,"/mnt/supercache/%s",pathname);
+  char command[256];
+  sprintf(command,"mv %s %s",from_path,to_path);
+  //printf("+++++++++++++++++++++++++++++++++++++++++++++%s\n",command);
+  system(command);
+  //printf("+++++++++++++++++++++++++++++++++++++++++%s\n",from_path);
+  //printf("+++++++++++++++++++++++++++++++++++++++++%s\n",to_path);
   return ret;
 }
 
@@ -1535,13 +1544,6 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
   struct connection_info_struct *con_info = coninfo_cls;
   FILE *fp;
 
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("key:%s\n",key);
-    printf("filename:%s\n",filename);
-    printf("transfer_enconding:%s\n",transfer_encoding);
-    printf("content_type:%s\n",content_type);
-    printf("data:%s\n",data);
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 	printf("now in iterate_post!\n");
 //	printf("the data is : %s\n",data);
 	printf("the data size is %d \n",size);
@@ -1552,7 +1554,7 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
 
 
 
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~IP of client is : %s\n",con_info->ip);
+    //printf("IP of client is : %s\n",con_info->client_ip);
 
 
 
@@ -1585,9 +1587,13 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
     return MHD_NO;
 }
 
+    char temp_filename[256];
+    sprintf(temp_filename,"%s.%s",filename,con_info->client_ip);
+    //printf("@#@#@#@#@#@#@@##@#@#@#@#@#@#@#@@#@##%s\n",temp_filename);
     char pathname[256];
-    get_cache_path(filename,pathname);
-    printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%d\n",getpid());
+    get_cache_path(temp_filename,pathname);
+    
+    //printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%d\n",getpid());
     //time_t arrive_time;
     //time(&arrive_time);
     //IO_Type io_type=WRITE;
