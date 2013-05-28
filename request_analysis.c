@@ -6,6 +6,7 @@
 #include "posix_for_s3.h"
 #include "utility.h"
 
+unsigned int nr_of_uploading_clients=0; 
 int
 request_get(void *cls, struct MHD_Connection *connection,          
                       const char *url, const char *method,
@@ -239,8 +240,6 @@ request_put(void *cls, struct MHD_Connection *connection,         \
 	printf("request_analysis.c 431 line  url is %s \n",send_header.Pathname);
 	//***************************sender_head end
 
-
-
 	get_sonstr(url,bucket_object);
 	if(judge_object_or_bucket_in_put(bucket_object)>0)
 	{
@@ -264,16 +263,8 @@ request_put(void *cls, struct MHD_Connection *connection,         \
 			return MHD_NO;
 
 	}		
-	
-
 		
 	else{
-
-
-
-
-
-
 	printf("%s PUT  data: %s",__func__, url);
 	
 	temp=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
@@ -287,13 +278,7 @@ request_put(void *cls, struct MHD_Connection *connection,         \
 		perror("chdir error");
 		return 0;
 	}
-	
-
-
-	
-	
-
-	
+		
 		if (NULL == *con_cls)
 
 		{
@@ -645,48 +630,52 @@ request_post(void *cls, struct MHD_Connection *connection,         \
                       const char *version,const char *upload_data,   \
                       size_t *upload_data_size, void **con_cls)
 {
-  
+ 
 	char pathname[128];
-		char bucket[64];
-		char b_host[128];
-		char *temp;
-		char *pathname_xml;
-		char *delim=".";
-		int n,m,i,ret,fd;
-		struct stat sbuf;;
-		struct MHD_Response *response;
-		int count[1];
-		char buftest[BUFTESTSIZE];
-		sender_head send_header;
-		//*****************add to generate a bucket or object name
-		char *bucket_object[128];
-	
-		temp=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
-		printf("request_analysis 934 line host is %s\n",temp);
-        char* client_ip;
-	    client_ip=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Ip");
-		strncpy(b_host,temp,strlen(temp)+1);
-		strtok(b_host, delim);
-		strncpy(pathname,b_host,strlen(b_host)+1);
-		//strncpy(pathname_xml,b_host,strlen(b_host)+1);
-		//strcat(pathname_xml,".xml");
-		//POST pathname_xml=my_itoa(getpid());
+	char bucket[64];
+	char b_host[128];
+	char *temp;
+	char *pathname_xml;
+	char *delim=".";
+	int n,m,i,ret,fd;
+	struct stat sbuf;;
+	struct MHD_Response *response;
+	int count[1];
+	char buftest[BUFTESTSIZE];
+	sender_head send_header;
+	//*****************add to generate a bucket or object name
+	char *bucket_object[128];
+
+    //printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+	temp=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
+	//printf("request_analysis 934 line host is %s\n",temp);
+    //char* client_ip;
+	//client_ip=MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Ip");
+	union MHD_ConnectionInfo * conninfo = MHD_get_connection_info(connection,MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+    struct sockaddr_in *client_addr=(struct sockaddr_in *)conninfo->client_addr;
+    char* client_ip=inet_ntoa(client_addr->sin_addr);
+    //printf("client_ip:%s\n",client_ip1);
+    strncpy(b_host,temp,strlen(temp)+1);
+	strtok(b_host, delim);
+	strncpy(pathname,b_host,strlen(b_host)+1);
+	//strncpy(pathname_xml,b_host,strlen(b_host)+1);
+	//strcat(pathname_xml,".xml");
+	//POST pathname_xml=my_itoa(getpid());
 	
   	//if(strcmp(url,"/")==0) {
 	//************************judge get objects or bucket********
-	printf("url is %s\n",url);
+	//printf("url is %s\n",url);
 	//************************sender_head 
 //********************************************************************
 
 	strncpy(send_header.Connection,"close",strlen("close")+1);
-	printf("request_analysis.c 95line  date is %s \n",send_header.Connection);
+	//printf("request_analysis.c 95line  date is %s \n",send_header.Connection);
 
 	strncpy(send_header.Pathname,url+1,strlen(url));
-	printf("request_analysis.c 98 line  url is %s \n",send_header.Pathname);
+	//printf("request_analysis.c 98 line  url is %s \n",send_header.Pathname);
 	//***************************sender_head end
 
 /*
-
 	get_sonstr(url,bucket_object);
 	if(judge_object_or_bucket_in_put(bucket_object)>0)
 	{
@@ -708,51 +697,42 @@ request_post(void *cls, struct MHD_Connection *connection,         \
 		}
 		else
 			return MHD_NO;
-
-	}		
-	
-
-		
+    }				
 	else{
 
 */
-		printf("%s Post  data: %s",__func__, url);
-		
-
-
-
+	//printf("%s Post  data: %s",__func__, url);
 	//char *cheek;
-  if (NULL == *con_cls)
+    if (NULL == *con_cls)
     {
-      struct connection_info_struct *con_info;
+        //means the start of the upload.(every uploading file has one start)
+        struct connection_info_struct *con_info;
+        if (nr_of_uploading_clients >= MAXCLIENTS)
+            return send_page (connection, busypage, MHD_HTTP_SERVICE_UNAVAILABLE,send_header.Pathname,client_ip);
+        ++nr_of_uploading_clients;//increase the con-clients
+        printf("*************Uploading file %s from Ip:%s*************\n",send_header.Pathname,client_ip);
+        printf("Now there are %d clients uploading files\n",nr_of_uploading_clients);
+        con_info = malloc (sizeof (struct connection_info_struct));
+        if (NULL == con_info)
+            return MHD_NO;
+        con_info->fp = NULL;
+	    //printf("method is %s\n",method);
+		//printf("in answer url is %s\n",url);
+	    //printf("version is %s\n",version);
+	    //printf("upload_data  is  %s\n",upload_data);
+	    //printf("*upload_data_size is  %d\n",*upload_data_size);
 
-      if (nr_of_uploading_clients >= MAXCLIENTS)
-        return send_page (connection, busypage, MHD_HTTP_SERVICE_UNAVAILABLE,send_header.Pathname,client_ip);
-
-      con_info = malloc (sizeof (struct connection_info_struct));
-      if (NULL == con_info)
-        return MHD_NO;
-
-      con_info->fp = NULL;
-	printf("method is %s\n",method);
-		printf("in answer url is %s\n",url);
-	//	printf("version is %s\n",version);
-	//	printf("upload_data  is  %s\n",upload_data);
-	//	printf("*upload_data_size is  %d\n",*upload_data_size);
-
-	//	cheek=MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "user");
+	    //cheek=MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "user");
 		
-	//	printf("cheek  is  %s \n",cheek);
+	    //printf("cheek  is  %s \n",cheek);
     
+        //**********************20130515****************************************
 
+        //printf("ip is %s\n",ip);
+        strcpy(con_info->client_ip,client_ip);
+	    //printf("request_analusis.c :the ip of client  is %s   &&    %s(con_info->ip)\n",ip,con_info->ip);
 
-//**********************20130515****************************************
-
-    //printf("ip is %s\n",ip);
-    strcpy(con_info->client_ip,client_ip);
-	//printf("request_analusis.c :the ip of client  is %s   &&    %s(con_info->ip)\n",ip,con_info->ip);
-
-//**********************20130515***************************************
+        //**********************20130515***************************************
 
       if (0 == strcmp (method, "POST"))
         {
@@ -762,7 +742,7 @@ request_post(void *cls, struct MHD_Connection *connection,         \
           if (NULL == con_info->postprocessor)
             {
               free (con_info);
-		printf("MHD_create_post_processor error!\n");
+		      printf("MHD_create_post_processor error!\n");
               return MHD_NO;
             }
 
@@ -783,7 +763,6 @@ request_post(void *cls, struct MHD_Connection *connection,         \
   if (0 == strcmp (method, "GET"))
     {
       char buffer[1024];
-
       snprintf (buffer, sizeof (buffer), askpage, nr_of_uploading_clients);
       return send_page (connection, buffer, MHD_HTTP_OK,send_header.Pathname,client_ip);
     }
@@ -801,18 +780,16 @@ request_post(void *cls, struct MHD_Connection *connection,         \
           return MHD_YES;
         }
       else
-	{
-	  if (NULL != con_info->fp)
-		{
-	    fclose (con_info->fp);
-		 con_info->fp = NULL; 
-
-	}
+	    {
+	        if(NULL != con_info->fp)
+		    {
+	            fclose (con_info->fp);
+		        con_info->fp = NULL; 
+            }
 	  /* Now it is safe to open and inspect the file before calling send_page with a response */
-	  return send_page (connection, con_info->answerstring,
+	        return send_page (connection, con_info->answerstring,
 			    con_info->answercode,send_header.Pathname,client_ip);
-	}
-
+	    }
     }
 
   return send_page (connection, errorpage, MHD_HTTP_BAD_REQUEST,send_header.Pathname,client_ip);

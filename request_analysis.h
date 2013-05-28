@@ -12,13 +12,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include "xml.h"
 
 #define POSTBUFFERSIZE 512
 #define BUFTESTSIZE 4096
 #define POST 1
 #define STDOUT_FIFENO 0
-#define MAXCLIENTS      2
+#define MAXCLIENTS      20 //means the max clients number uploading files in the same time
 
 #define GET             0
 //#define POST            1
@@ -55,7 +57,8 @@ request_head(void *cls, struct MHD_Connection *connection,         \
                       const char *version,const char *upload_data,   \
                       size_t *upload_data_size, void **con_cls);
 
-static unsigned int nr_of_uploading_clients = 0;
+
+extern unsigned int nr_of_uploading_clients;//define an overall var, means the number of clients who are uploading data.
 
 struct connection_info_struct
 {

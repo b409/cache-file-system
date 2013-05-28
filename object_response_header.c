@@ -1521,6 +1521,8 @@ send_page (struct MHD_Connection *connection, const char *page,
   MHD_add_response_header (response, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
   ret = MHD_queue_response (connection, status_code, response);
   MHD_destroy_response (response);
+  --nr_of_uploading_clients;//decrease the con-clients
+  printf("after:%d\n",nr_of_uploading_clients);
   char from_path[128];
   char to_path[128];
   sprintf(from_path,"/mnt/supercache/%s.%s",pathname,client_ip);
@@ -1544,40 +1546,18 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
   struct connection_info_struct *con_info = coninfo_cls;
   FILE *fp;
 
-	printf("now in iterate_post!\n");
+	//printf("now in iterate_post!\n");
 //	printf("the data is : %s\n",data);
-	printf("the data size is %d \n",size);
-
-
+	//printf("the data size is %d \n",size);
 
 //********************************20130515***************************
 
 
-
-    //printf("IP of client is : %s\n",con_info->client_ip);
-
-
-
-
-
-
-
-
-
-
-
-
-
+   // printf("IP of client is : %s\n",con_info->client_ip);
+    //return MHD_NO;
 
 //********************************20130515*****************************
-
-
-
-
-
-
-
-
+    
   con_info->answerstring = servererrorpage;
   con_info->answercode = MHD_HTTP_INTERNAL_SERVER_ERROR;
 

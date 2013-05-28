@@ -26,9 +26,9 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
   */
  // json_object * Response_page = json_object_new_object();
   //json_object * Response_heads = json_object_new_object();
-  const char *page = "hello, cloud store!";
+  //const char *page = "hello, cloud store!";
   struct MHD_Response *response;
-	puts(page);
+	//puts(page);
   //int ret;
 char pathname[128];
 char pathname_mnt[128];
@@ -36,7 +36,7 @@ get_sonstr(url,pathname);
 memset(pathname_mnt,0,sizeof(pathname_mnt));
 strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
 
-    printf("pathname %s     pathname_mnt  %s  \n",pathname,pathname_mnt);
+    //printf("pathname %s     pathname_mnt  %s  \n",pathname,pathname_mnt);
 
   if (strcmp(method,"GET") == 0)
   {
@@ -115,10 +115,10 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
 
  else if (strcmp(method,"POST") == 0)
   {
-      printf("()()()()\n");
+      //printf("()()()()\n");
     //SimpleLog_Write(SL_DEBUG, __func__, "New %s request for %s using version %s", method, url, version);
-	printf("%s New %s request for %s using version %s\n",__func__, method, url, version);
-    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!up_load_size:%u  %s\n",upload_data_size,upload_data);
+	//printf("%s New %s request for %s using version %s\n",__func__, method, url, version);
+    //printf("up_load_size:%u  %s\n",upload_data_size,upload_data);
     /******************************************************/
     /*time_t arrive_time;
     time(&arrive_time);
@@ -143,15 +143,15 @@ strcat(strcat(pathname_mnt,"/mnt/supercache/"),pathname);
 void request_completed(void* cls,struct MHD_Connection *connection, 
                        void **con_cls,enum MHD_RequestTerminationCode toe)
 {
-    printf(" in request_completted\n");
+    printf("**********************request completted**************************\n");
 }
-int
-main ()
+
+int main ()
 {
   //SimpleLog_Setup(NULL, "%H:%M:%S", 0, 1, 0, "\t");
   //printf("%s New %s request for %s using version %s",__func__, method, url, version);
   struct MHD_Daemon *daemon;
-
+ // unsigned int nr_of_uploading_clients=0;
   daemon = MHD_start_daemon (MHD_USE_THREAD_PER_CONNECTION, PORT, NULL, NULL,
                              &answer_to_connection, NULL, MHD_OPTION_NOTIFY_COMPLETED,
                              &request_completed,NULL,MHD_OPTION_END);
