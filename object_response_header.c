@@ -1546,7 +1546,7 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
   struct connection_info_struct *con_info = coninfo_cls;
   FILE *fp;
 
-	//printf("now in iterate_post!\n");
+//	printf("now in iterate_post!\n");
 //	printf("the data is : %s\n",data);
 	//printf("the data size is %d \n",size);
 
@@ -1560,7 +1560,10 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
     
   con_info->answerstring = servererrorpage;
   con_info->answercode = MHD_HTTP_INTERNAL_SERVER_ERROR;
-
+  //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  //**************************************** 20130602****************************
+//    *************************************20130603*************************
+//    printf("filename  is  &&&  %s \n",filename);
   if (0 != strcmp (key, "file"))
 {
 	printf(" key is not file! quit out! \n");

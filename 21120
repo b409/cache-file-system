@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-  <Name>quotes</Name>
-  <Prefix>N</Prefix>
-  <Marker>Ned</Marker>
-  <Markerkey>40</Markerkey>
-  <IsTruncated>false</IsTruncated>
-<Content><Key>avahi-daemon</Key><LastModified>Fri Jul  1 22:58:17 2011
-</LastModified><ETag>"828ef3fdfa96f00ad9f27c383fc9ac7f"</ETag><Size>249</Size><StorageClass>STANDARD</StorageClass><Owner><ID>bcaf161ca5fb16fd081034f</ID><DisplayName>webfile</DisplayName></Owner></Content></ListBucketResult>
